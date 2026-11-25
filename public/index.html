@@ -184,7 +184,7 @@ const script = [
     // 0: ask username
     { therapist:["hiii 💞","welcome to findom therapyy","before we start our first therapy session i need to ask you a couple questions ~","let's start with ur twitter username <3"], input:'text', placeholder:'@username' },
     // 1: how long
-    { therapist:["perfect ~ nice to meet you {name}, i'm Mikayla <3","how long have u had this addiction for? 💞"], options:[
+    { therapist:["perfect ~ nice to meet you, i'm Mikayla <3","how long have u had this addiction for? 💞"], options:[
         { text:"a few weeks", score:1, key:"duration" },
         { text:"a few months", score:2, key:"duration" },
         { text:"over a year", score:3, key:"duration" },
@@ -206,14 +206,14 @@ const script = [
         { text:"manscam ~ i know she's fake but i don't care", score:1, key:"style" }
     ]},
     // 4: triggers / models (free text)
-    { therapist:["okay last one {name} ~","are there any specific models or triggers that make u relapse?","anything u type here stays between us ~"], input:'textarea', placeholder:'type here ~' }
+    { therapist:["okay last one ~","are there any specific models or triggers that make u relapse?","anything u type here stays between us ~"], input:'textarea', placeholder:'type here ~' }
 ];
 
 const diagnoses = [
-    { min:0, max:3, label:"early stage", response:["okay {name} ~","u're not deep yet ~ but u're here for a reason 🤭","let's keep an eye on this ~"] },
-    { min:4, max:6, label:"developing dependency", response:["{name} ~","u're past the 'i can stop whenever' stage ~","the patterns are forming ~ u need sessions before this takes over ~"] },
-    { min:7, max:9, label:"active addiction", response:["{name} ~","u already knew what i was going to say didn't u 🤭","ur brain has rewired itself around this ~ u need help ~"] },
-    { min:10, max:12, label:"severe addiction", response:["{name} ~ i need u to hear this","u are in crisis ~ this has taken over ur life ~","dm me ~ let's start real treatment 💜"] }
+    { min:0, max:3, label:"early stage", response:["okay ~","u're not deep yet ~ but u're here for a reason 🤭","let's keep an eye on this ~"] },
+    { min:4, max:6, label:"developing dependency", response:["hmm ~","u're past the 'i can stop whenever' stage ~","the patterns are forming ~ u need sessions before this takes over ~"] },
+    { min:7, max:9, label:"active addiction", response:["okay ~","u already knew what i was going to say didn't u 🤭","ur brain has rewired itself around this ~ u need help ~"] },
+    { min:10, max:12, label:"severe addiction", response:["i need u to hear this ~","u are in crisis ~ this has taken over ur life ~","dm me ~ let's start real treatment 💜"] }
 ];
 
 
