@@ -183,26 +183,26 @@ const script = [
     { therapist:["hi ~ welcome 💜","this is a safe space ~ no judgment here ~","what's ur twitter username?"], input:'text', placeholder:'@username' },
     // 1: how long
     { therapist:["{name} ~","let's start with the basics ~","how long has this been going on?"], options:[
-        { text:"a few weeks", emoji:"📅", score:1, key:"duration" },
-        { text:"a few months", emoji:"🗓️", score:2, key:"duration" },
-        { text:"over a year", emoji:"⏳", score:3, key:"duration" },
-        { text:"i don't even remember when it started", emoji:"💀", score:4, key:"duration" }
+        { text:"a few weeks", score:1, key:"duration" },
+        { text:"a few months", score:2, key:"duration" },
+        { text:"over a year", score:3, key:"duration" },
+        { text:"i don't even remember when it started", score:4, key:"duration" }
     ]},
     // 2: how much sent
     { therapist:["mhm ~ that's important to know ~","and be honest with me ~ how much have u sent in total?"], options:[
-        { text:"less than $100", emoji:"💵", score:1, key:"spent" },
-        { text:"$100 - $500", emoji:"💸", score:2, key:"spent" },
-        { text:"$500 - $2,000", emoji:"🔥", score:3, key:"spent" },
-        { text:"$2,000+", emoji:"💀", score:4, key:"spent" }
+        { text:"less than $100", score:1, key:"spent" },
+        { text:"$100 - $500", score:2, key:"spent" },
+        { text:"$500 - $2,000", score:3, key:"spent" },
+        { text:"$2,000+", score:4, key:"spent" }
     ]},
     // 3: dom style
     { therapist:["okay ~ this helps me understand u better ~","what type of dom do u usually go for?"], options:[
-        { text:"findom", emoji:"💸", score:1, key:"style" },
-        { text:"catfish findom", emoji:"🐱", score:1, key:"style" },
-        { text:"humiliation / degradation", emoji:"🤭", score:1, key:"style" },
-        { text:"girlfriend experience", emoji:"💕", score:1, key:"style" },
-        { text:"blackmail / exposure", emoji:"🎭", score:1, key:"style" },
-        { text:"all of the above", emoji:"💀", score:2, key:"style" }
+        { text:"findom", score:1, key:"style" },
+        { text:"catfish findom", score:1, key:"style" },
+        { text:"humiliation / degradation", score:1, key:"style" },
+        { text:"girlfriend experience", score:1, key:"style" },
+        { text:"blackmail / exposure", score:1, key:"style" },
+        { text:"all of the above", score:2, key:"style" }
     ]},
     // 4: triggers / models (free text)
     { therapist:["almost done {name} ~ u're doing great 💜","last thing ~ any specific triggers or models that make u relapse?","don't hold back ~ everything here is confidential ~"], input:'textarea', placeholder:'type here ~ be honest 💜' }
@@ -284,7 +284,7 @@ function showOptions(options) {
     options.forEach(opt => {
         const btn = document.createElement('button');
         btn.className = 'opt-btn';
-        btn.innerHTML = `<span class="opt-emoji">${opt.emoji}</span>${opt.text}`;
+        btn.innerHTML = opt.emoji ? `<span class="opt-emoji">${opt.emoji}</span>${opt.text}` : opt.text;
         btn.onclick = () => selectOption(opt);
         optTray.appendChild(btn);
     });
