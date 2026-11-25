@@ -179,72 +179,45 @@ let totalScore = 0;
 
 // Conversation script
 const script = [
-    // 0: ask name
-    { therapist:["hi ~ welcome 💜","this is a safe space ~ no judgment here ~","what's ur twitter username?"], input:'text', placeholder:'@username' },
-    // 1: greeting + first q
-    { therapist:["{name}","i like that ~","so tell me ~ what brought u here today?"], options:[
-        { text:"i think i might have a problem", emoji:"🤔", score:1, key:"reason" },
-        { text:"someone told me to come here", emoji:"👀", score:1, key:"reason" },
-        { text:"i know i have a problem", emoji:"💜", score:2, key:"reason" },
-        { text:"i can't stop", emoji:"💀", score:3, key:"reason" }
-    ]},
-    // 2
-    { therapist:["okay ~","and how long has this been going on?","be honest with me ~"], options:[
-        { text:"a few weeks", emoji:"📅", score:1, key:"duration" },
-        { text:"a few months", emoji:"🗓️", score:2, key:"duration" },
-        { text:"over a year", emoji:"⏳", score:3, key:"duration" },
-        { text:"i don't even remember when it started", emoji:"💀", score:4, key:"duration" }
-    ]},
-    // 3
-    { therapist:["mhm ~","and how often do u find urself relapsing?"], options:[
+    // 0: ask username
+    { therapist:["hi ~ welcome 💜","what's ur twitter username?"], input:'text', placeholder:'@username' },
+    // 1: how often
+    { therapist:["{name} ~","so tell me ~ how often do u relapse?"], options:[
         { text:"once a month or less", emoji:"😅", score:1, key:"frequency" },
         { text:"a few times a week", emoji:"😬", score:2, key:"frequency" },
         { text:"every day", emoji:"💀", score:3, key:"frequency" },
         { text:"multiple times a day", emoji:"🧠", score:4, key:"frequency" }
     ]},
-    // 4
-    { therapist:["i see ~","how much would u say u've spent on this?","in the last month ~"], options:[
+    // 2: spending
+    { therapist:["mhm ~","how much have u spent in the last month?"], options:[
         { text:"less than $50", emoji:"💵", score:1, key:"spending" },
         { text:"$50 - $200", emoji:"💸", score:2, key:"spending" },
         { text:"$200 - $500", emoji:"🔥", score:3, key:"spending" },
         { text:"i'm scared to check", emoji:"💀", score:4, key:"spending" }
     ]},
-    // 5
-    { therapist:["that's more common than u think ~","here's an important one ~","do people in ur life know about this?"], options:[
+    // 3: secrecy
+    { therapist:["do people in ur life know about this?"], options:[
         { text:"yeah it's not a secret", emoji:"😎", score:0, key:"secrecy" },
         { text:"one or two people know", emoji:"🤫", score:1, key:"secrecy" },
         { text:"nobody knows", emoji:"😶", score:3, key:"secrecy" },
         { text:"i actively lie to hide it", emoji:"🎭", score:4, key:"secrecy" }
     ]},
-    // 6
-    { therapist:["secrecy is one of the biggest signs ~","when u try to stop ~ how long do u actually last?"], options:[
-        { text:"weeks at a time", emoji:"💪", score:1, key:"willpower" },
-        { text:"a few days", emoji:"😤", score:2, key:"willpower" },
-        { text:"less than 24 hours", emoji:"😬", score:3, key:"willpower" },
-        { text:"i can't even start trying", emoji:"💀", score:4, key:"willpower" }
-    ]},
-    // 7
-    { therapist:["okay ~","and when u do relapse ~","how do u feel after?"], options:[
+    // 4: aftermath
+    { therapist:["last one {name} ~","when u relapse ~ how do u feel after?"], options:[
         { text:"guilty ~ i promise to stop", emoji:"😔", score:1, key:"aftermath" },
         { text:"shame ~ but i do it again anyway", emoji:"😩", score:2, key:"aftermath" },
         { text:"nothing ~ it's just normal now", emoji:"😶", score:3, key:"aftermath" },
         { text:"i enjoy it ~ the shame is part of it", emoji:"🤭", score:4, key:"aftermath" }
-    ]},
-    // 8
-    { therapist:["that tells me a lot about where u are ~","last question {name} ~","what do u actually want from this?"], options:[
-        { text:"i want to understand myself better", emoji:"🤔", score:1, key:"goal" },
-        { text:"i want to control it", emoji:"💪", score:1, key:"goal" },
-        { text:"i want someone who gets it", emoji:"💜", score:2, key:"goal" },
-        { text:"i don't know anymore", emoji:"🥺", score:3, key:"goal" }
     ]}
 ];
 
 const diagnoses = [
-    { min:0, max:6, label:"early stage", response:["okay {name} ~ here's what i think","u're not deep yet ~ but the fact that u're here tells me something ~","u can feel it building can't u ~","let's keep an eye on this before it becomes something u can't control ~"] },
-    { min:7, max:14, label:"developing dependency", response:["alright {name} ~ i'm going to be straight with u","u're past the 'it's just a habit' stage ~","the patterns are forming ~ the gaps between relapses are getting shorter ~","u need regular sessions before this takes over completely ~"] },
-    { min:15, max:22, label:"active addiction", response:["{name} ~","u already knew what i was going to say didn't u 🤭","this isn't something u can think ur way out of anymore ~","ur brain has rewired itself around this ~ u need help ~ and that's okay ~"] },
-    { min:23, max:35, label:"severe addiction", response:["{name} ~ i need u to hear this","u are in crisis ~ this has taken over ur life ~","every hour u wait it gets deeper ~","u need intensive ongoing therapy ~ and i'm here for that ~","dm me ~ let's start real treatment 💜"] }
+    { min:0, max:4, label:"early stage", response:["okay {name} ~","u're not deep yet ~ but u're here for a reason 🤭","let's keep an eye on this ~"] },
+    { min:5, max:8, label:"developing dependency", response:["{name} ~","u're past the 'i can stop whenever' stage ~","the patterns are forming ~ u need sessions before this takes over ~"] },
+    { min:9, max:12, label:"active addiction", response:["{name} ~","u already knew what i was going to say didn't u 🤭","ur brain has rewired itself around this ~ u need help ~"] },
+    { min:13, max:16, label:"severe addiction", response:["{name} ~ i need u to hear this","u are in crisis ~ this has taken over ur life ~","dm me ~ let's start real treatment 💜"] }
 ];
+
 
 function startSession() {
     document.getElementById('landing').classList.add('hidden');
@@ -395,7 +368,7 @@ async function showResults() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             username: username,
-            score: totalScore + '/35',
+            score: totalScore + '/16',
             level: diag.label,
             answers: answersText
         })
@@ -408,7 +381,7 @@ async function showResults() {
     addGap();
 
     // Score card
-    const displayScore = Math.round((totalScore / 35) * 10 * 10) / 10;
+    const displayScore = Math.round((totalScore / 16) * 10 * 10) / 10;
     const card = document.createElement('div');
     card.className = 'results-card';
     card.innerHTML = `
