@@ -440,13 +440,6 @@ async function showResults() {
     ctaRow.innerHTML = `<a class="cta-btn" href="https://twitter.com/messages/compose?recipient_id=TWITTER_ID" target="_blank">dm @therapy4addict on twitter 💜</a>`;
     chat.appendChild(ctaRow);
     scrollDown();
-
-    // Also show "take again" after a moment
-    await new Promise(r => setTimeout(r, 1000));
-    const again = document.createElement('div');
-    again.className = 'cta-row';
-    again.innerHTML = `<a class="cta-btn" href="javascript:location.reload()" style="background:transparent; border:1px solid rgba(147,51,234,0.3); box-shadow:none; color:#c084fc;">start over</a>`;
-    chat.appendChild(again);
     scrollDown();
 }
 </script>
