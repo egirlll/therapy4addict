@@ -180,23 +180,23 @@ let totalScore = 0;
 // Conversation script
 const script = [
     // 0: ask username
-    { therapist:["hi ~ welcome 💜","what's ur twitter username?"], input:'text', placeholder:'@username' },
+    { therapist:["hi ~ welcome 💜","this is a safe space ~ no judgment here ~","what's ur twitter username?"], input:'text', placeholder:'@username' },
     // 1: how long
-    { therapist:["{name} ~","how long has this been going on?"], options:[
+    { therapist:["{name} ~","let's start with the basics ~","how long has this been going on?"], options:[
         { text:"a few weeks", emoji:"📅", score:1, key:"duration" },
         { text:"a few months", emoji:"🗓️", score:2, key:"duration" },
         { text:"over a year", emoji:"⏳", score:3, key:"duration" },
         { text:"i don't even remember when it started", emoji:"💀", score:4, key:"duration" }
     ]},
     // 2: how much sent
-    { therapist:["mhm ~","how much have u sent in total?"], options:[
+    { therapist:["mhm ~ that's important to know ~","and be honest with me ~ how much have u sent in total?"], options:[
         { text:"less than $100", emoji:"💵", score:1, key:"spent" },
         { text:"$100 - $500", emoji:"💸", score:2, key:"spent" },
         { text:"$500 - $2,000", emoji:"🔥", score:3, key:"spent" },
         { text:"$2,000+", emoji:"💀", score:4, key:"spent" }
     ]},
     // 3: dom style
-    { therapist:["what type of dom do u go for?"], options:[
+    { therapist:["okay ~ this helps me understand u better ~","what type of dom do u usually go for?"], options:[
         { text:"findom", emoji:"💸", score:1, key:"style" },
         { text:"catfish findom", emoji:"🐱", score:1, key:"style" },
         { text:"humiliation / degradation", emoji:"🤭", score:1, key:"style" },
@@ -205,7 +205,7 @@ const script = [
         { text:"all of the above", emoji:"💀", score:2, key:"style" }
     ]},
     // 4: triggers / models (free text)
-    { therapist:["last thing {name} ~","any specific triggers or models that make u relapse?"], input:'textarea', placeholder:'type here ~ be honest 💜' }
+    { therapist:["almost done {name} ~ u're doing great 💜","last thing ~ any specific triggers or models that make u relapse?","don't hold back ~ everything here is confidential ~"], input:'textarea', placeholder:'type here ~ be honest 💜' }
 ];
 
 const diagnoses = [
