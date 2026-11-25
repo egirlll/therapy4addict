@@ -2,734 +2,444 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>therapy4addict</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #fff; min-height: 100vh; overflow-x: hidden; }
-        body::before { content:''; position:fixed; inset:0; background-image: linear-gradient(rgba(147,51,234,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(147,51,234,0.03) 1px, transparent 1px); background-size: 60px 60px; pointer-events:none; z-index:0; }
-        .container { max-width:520px; margin:0 auto; padding:20px; position:relative; z-index:1; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:#0a0a0f; color:#fff; height:100vh; height:100dvh; display:flex; flex-direction:column; overflow:hidden; }
 
-        .header { text-align:center; padding:40px 0 20px; }
-        .header h1 { font-size:32px; font-weight:700; background:linear-gradient(135deg,#9333ea,#c084fc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-        .header .tagline { font-size:13px; color:rgba(255,255,255,0.35); margin-top:8px; letter-spacing:1px; }
+        /* Header */
+        .chat-header {
+            padding:16px 20px; display:flex; align-items:center; gap:14px;
+            background:rgba(15,15,25,0.95); border-bottom:1px solid rgba(147,51,234,0.1);
+            backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); flex-shrink:0; z-index:10;
+        }
+        .avatar { width:42px; height:42px; border-radius:50%; background:linear-gradient(135deg,#9333ea,#c084fc);
+            display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+        .header-info h2 { font-size:16px; font-weight:600; color:#fff; }
+        .header-status { font-size:12px; color:#22c55e; display:flex; align-items:center; gap:5px; }
+        .header-status::before { content:''; width:6px; height:6px; border-radius:50%; background:#22c55e; }
 
-        .screen { display:none; animation: fadeIn 0.4s ease; }
-        .screen.active { display:block; }
-        @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        /* Chat area */
+        .chat-area {
+            flex:1; overflow-y:auto; padding:20px 16px; display:flex; flex-direction:column; gap:4px;
+            scroll-behavior:smooth; -webkit-overflow-scrolling:touch;
+        }
+        .chat-area::-webkit-scrollbar { width:0; }
 
-        .card { background:rgba(147,51,234,0.04); border:1px solid rgba(147,51,234,0.12); border-radius:16px; padding:24px; margin:14px 0; }
-        .card-title { font-size:12px; text-transform:uppercase; letter-spacing:2px; color:rgba(147,51,234,0.5); margin-bottom:14px; }
+        /* Messages */
+        .msg-row { display:flex; max-width:85%; animation:msgIn 0.3s ease; }
+        .msg-row.therapist { align-self:flex-start; }
+        .msg-row.patient { align-self:flex-end; }
+        @keyframes msgIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
 
-        .btn { display:block; width:100%; padding:14px; border:none; border-radius:12px; font-family:'Inter',sans-serif; font-size:15px; font-weight:600; cursor:pointer; transition:all 0.3s; letter-spacing:0.5px; margin:8px 0; text-align:center; text-decoration:none; }
-        .btn-primary { background:linear-gradient(135deg,#9333ea,#c084fc); color:#fff; box-shadow:0 4px 20px rgba(147,51,234,0.3); }
-        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 6px 30px rgba(147,51,234,0.4); }
-        .btn-outline { background:transparent; color:#9333ea; border:1px solid rgba(147,51,234,0.3); }
-        .btn-outline:hover { background:rgba(147,51,234,0.08); }
-        .btn-danger { background:rgba(255,0,0,0.1); color:#ff4444; border:1px solid rgba(255,0,0,0.2); }
+        .bubble {
+            padding:10px 14px; border-radius:18px; font-size:14.5px; line-height:1.55;
+            word-wrap:break-word; position:relative;
+        }
+        .therapist .bubble {
+            background:rgba(147,51,234,0.12); border:1px solid rgba(147,51,234,0.15);
+            border-bottom-left-radius:4px; color:rgba(255,255,255,0.85);
+        }
+        .patient .bubble {
+            background:#9333ea; border-bottom-right-radius:4px; color:#fff;
+        }
 
-        .input-group { margin:12px 0; }
-        .input-group label { display:block; font-size:11px; text-transform:uppercase; letter-spacing:2px; color:rgba(255,255,255,0.35); margin-bottom:8px; }
-        .input-group input, .input-group select, .input-group textarea { width:100%; padding:12px 16px; background:rgba(255,255,255,0.05); border:1px solid rgba(147,51,234,0.2); border-radius:10px; color:#fff; font-family:'Inter',sans-serif; font-size:15px; outline:none; transition:border-color 0.3s; resize:none; }
-        .input-group input:focus, .input-group select:focus, .input-group textarea:focus { border-color:#9333ea; }
-        .input-group select option { background:#1a1a2e; color:#fff; }
+        .msg-gap { height:12px; flex-shrink:0; }
 
-        .mono { font-family:'JetBrains Mono',monospace; }
-        .purple { color:#9333ea; }
-        .dim { color:rgba(255,255,255,0.3); }
-        .center { text-align:center; }
+        /* Typing indicator */
+        .typing { display:flex; align-items:center; gap:4px; padding:12px 16px; align-self:flex-start; }
+        .typing-dot {
+            width:7px; height:7px; border-radius:50%; background:rgba(147,51,234,0.4);
+            animation:typePulse 1.4s infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay:0.2s; }
+        .typing-dot:nth-child(3) { animation-delay:0.4s; }
+        @keyframes typePulse { 0%,60%,100%{opacity:0.3;transform:scale(1)} 30%{opacity:1;transform:scale(1.2)} }
 
-        /* Intake steps */
-        .intake-step { font-size:18px; font-weight:500; margin-bottom:6px; line-height:1.5; color:#fff; }
-        .intake-sub { font-size:13px; color:rgba(255,255,255,0.35); margin-bottom:20px; line-height:1.6; }
-        .intake-options { display:flex; flex-direction:column; gap:10px; }
-        .intake-opt { padding:14px 18px; background:rgba(147,51,234,0.04); border:1px solid rgba(147,51,234,0.12); border-radius:12px; cursor:pointer; font-size:14px; color:rgba(255,255,255,0.7); transition:all 0.2s; display:flex; align-items:center; gap:12px; }
-        .intake-opt:hover { background:rgba(147,51,234,0.1); border-color:rgba(147,51,234,0.3); color:#fff; }
-        .intake-opt.selected { background:rgba(147,51,234,0.15); border-color:#9333ea; color:#fff; }
-        .intake-opt .opt-emoji { font-size:18px; }
+        /* Response options */
+        .options-tray {
+            padding:12px 16px; display:flex; flex-direction:column; gap:8px;
+            flex-shrink:0; background:rgba(10,10,15,0.95); border-top:1px solid rgba(147,51,234,0.08);
+            backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+            max-height:60vh; overflow-y:auto; animation:trayIn 0.3s ease;
+        }
+        @keyframes trayIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 
-        .progress-bar { display:flex; gap:4px; justify-content:center; margin:20px 0 10px; }
-        .progress-seg { flex:1; height:4px; border-radius:2px; background:rgba(147,51,234,0.15); transition:all 0.3s; max-width:40px; }
-        .progress-seg.done { background:#9333ea; }
-        .progress-seg.current { background:#c084fc; }
-        .step-counter { font-size:12px; color:rgba(255,255,255,0.2); text-align:center; letter-spacing:2px; margin-bottom:16px; }
+        .opt-btn {
+            padding:12px 16px; border-radius:14px; font-size:14px; font-family:'Inter',sans-serif;
+            cursor:pointer; transition:all 0.2s; text-align:left; display:flex; align-items:center; gap:10px;
+            background:rgba(147,51,234,0.06); border:1px solid rgba(147,51,234,0.15); color:rgba(255,255,255,0.75);
+        }
+        .opt-btn:hover { background:rgba(147,51,234,0.15); border-color:rgba(147,51,234,0.3); color:#fff; transform:translateX(4px); }
+        .opt-btn:active { transform:scale(0.98); }
+        .opt-emoji { font-size:16px; flex-shrink:0; }
 
-        /* Results */
-        .result-score { font-family:'JetBrains Mono',monospace; font-size:64px; font-weight:700; color:#9333ea; text-shadow:0 0 60px rgba(147,51,234,0.4); }
-        .result-label { font-size:22px; font-weight:600; color:#c084fc; margin:8px 0; }
-        .result-desc { font-size:14px; color:rgba(255,255,255,0.45); line-height:1.7; margin:12px 0 24px; }
-        .result-bar-bg { width:100%; height:10px; background:rgba(255,255,255,0.05); border-radius:5px; overflow:hidden; margin:16px 0; }
-        .result-bar-fill { height:100%; border-radius:5px; transition:width 1.5s ease; background:linear-gradient(90deg,#c084fc,#9333ea,#7c3aed); }
+        /* Text input */
+        .input-tray {
+            padding:12px 16px; display:flex; gap:10px; align-items:center; flex-shrink:0;
+            background:rgba(10,10,15,0.95); border-top:1px solid rgba(147,51,234,0.08);
+            backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); animation:trayIn 0.3s ease;
+        }
+        .input-tray input {
+            flex:1; padding:12px 16px; border-radius:22px; font-size:15px; font-family:'Inter',sans-serif;
+            background:rgba(255,255,255,0.06); border:1px solid rgba(147,51,234,0.15); color:#fff; outline:none;
+        }
+        .input-tray input:focus { border-color:rgba(147,51,234,0.4); }
+        .input-tray input::placeholder { color:rgba(255,255,255,0.25); }
+        .send-btn {
+            width:42px; height:42px; border-radius:50%; border:none; cursor:pointer; flex-shrink:0;
+            background:linear-gradient(135deg,#9333ea,#c084fc); color:#fff; font-size:18px;
+            display:flex; align-items:center; justify-content:center; transition:transform 0.2s;
+        }
+        .send-btn:hover { transform:scale(1.05); }
 
-        /* Dashboard */
-        .nav-card { display:flex; align-items:center; justify-content:space-between; background:rgba(147,51,234,0.04); border:1px solid rgba(147,51,234,0.12); border-radius:14px; padding:18px 20px; margin:10px 0; cursor:pointer; transition:all 0.3s; }
-        .nav-card:hover { background:rgba(147,51,234,0.08); border-color:rgba(147,51,234,0.3); transform:translateX(4px); }
-        .nav-title { font-size:16px; font-weight:600; color:#c084fc; }
-        .nav-sub { font-size:12px; color:rgba(255,255,255,0.3); margin-top:3px; }
-        .nav-arrow { font-size:18px; color:rgba(147,51,234,0.4); transition:color 0.3s; }
-        .nav-card:hover .nav-arrow { color:#9333ea; }
+        /* Landing overlay */
+        .landing {
+            position:fixed; inset:0; background:#0a0a0f; z-index:100;
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            padding:30px; text-align:center; animation:fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+        .landing.hidden { display:none; }
+        .landing-icon { font-size:64px; margin-bottom:20px; }
+        .landing h1 {
+            font-size:28px; font-weight:700;
+            background:linear-gradient(135deg,#9333ea,#c084fc); -webkit-background-clip:text;
+            -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:8px;
+        }
+        .landing .sub { font-size:14px; color:rgba(255,255,255,0.35); line-height:1.6; margin-bottom:32px; }
+        .landing .start-btn {
+            padding:16px 48px; border-radius:14px; border:none; font-family:'Inter',sans-serif;
+            font-size:16px; font-weight:600; cursor:pointer;
+            background:linear-gradient(135deg,#9333ea,#c084fc); color:#fff;
+            box-shadow:0 4px 30px rgba(147,51,234,0.3); transition:all 0.3s;
+        }
+        .landing .start-btn:hover { transform:translateY(-2px); box-shadow:0 6px 40px rgba(147,51,234,0.4); }
+        .landing .fine { font-size:11px; color:rgba(255,255,255,0.12); margin-top:24px; }
 
-        /* Session cards */
-        .session-card { display:flex; align-items:center; justify-content:space-between; background:rgba(147,51,234,0.04); border:1px solid rgba(147,51,234,0.12); border-radius:14px; padding:16px 20px; margin:10px 0; cursor:pointer; transition:all 0.3s; }
-        .session-card:hover { background:rgba(147,51,234,0.1); border-color:rgba(147,51,234,0.3); transform:translateY(-2px); box-shadow:0 4px 20px rgba(147,51,234,0.15); }
-        .session-left { display:flex; align-items:center; gap:14px; }
-        .session-emoji { font-size:28px; width:48px; height:48px; display:flex; align-items:center; justify-content:center; background:rgba(147,51,234,0.08); border-radius:12px; }
-        .session-name { font-size:16px; font-weight:600; color:#fff; }
-        .session-desc { font-size:11px; color:rgba(255,255,255,0.3); margin-top:3px; }
-        .session-price { font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:700; color:#9333ea; }
+        /* Results card */
+        .results-card {
+            align-self:flex-start; max-width:90%; background:rgba(147,51,234,0.06);
+            border:1px solid rgba(147,51,234,0.15); border-radius:16px; padding:20px;
+            margin:8px 0; animation:msgIn 0.5s ease;
+        }
+        .results-score {
+            font-family:'JetBrains Mono',monospace; font-size:48px; font-weight:700;
+            color:#9333ea; text-align:center; margin:8px 0;
+        }
+        .results-label { font-size:18px; font-weight:600; color:#c084fc; text-align:center; margin-bottom:8px; }
+        .results-bar { width:100%; height:8px; background:rgba(255,255,255,0.05); border-radius:4px; overflow:hidden; margin:12px 0; }
+        .results-bar-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,#c084fc,#9333ea,#7c3aed); transition:width 1.5s ease; }
+        .results-text { font-size:13px; color:rgba(255,255,255,0.4); line-height:1.7; text-align:center; }
 
-        /* Tracker */
-        .streak-number { font-family:'JetBrains Mono',monospace; font-size:32px; font-weight:600; color:#9333ea; }
-        .streak-bar-bg { width:100%; height:6px; background:rgba(147,51,234,0.1); border-radius:3px; margin-top:12px; overflow:hidden; }
-        .streak-bar-fill { height:100%; background:linear-gradient(90deg,#9333ea,#c084fc); border-radius:3px; transition:width 0.5s; }
-        .relapse-big { font-family:'JetBrains Mono',monospace; font-size:42px; font-weight:700; color:#ff4444; }
-        .relapse-calendar { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin:16px 0; }
-        .cal-day { width:100%; aspect-ratio:1; border-radius:6px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:500; color:rgba(255,255,255,0.25); transition:all 0.2s; }
-        .cal-day.relapsed { background:rgba(255,0,0,0.2); border-color:rgba(255,0,0,0.3); color:rgba(255,100,100,0.8); }
-        .cal-day.clean { background:rgba(0,255,100,0.08); border-color:rgba(0,255,100,0.15); color:rgba(100,255,150,0.6); }
-        .cal-day.today { border-color:#9333ea; box-shadow:0 0 8px rgba(147,51,234,0.2); }
-
-        .tx-list { list-style:none; max-height:180px; overflow-y:auto; }
-        .tx-item { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.05); font-size:13px; }
-        .tx-type { font-size:10px; padding:3px 8px; border-radius:4px; text-transform:uppercase; letter-spacing:1px; }
-        .tx-session { background:rgba(147,51,234,0.15); color:#c084fc; }
-        .tx-relapse { background:rgba(255,0,0,0.15); color:#ff4444; }
-        .tx-amount { font-family:'JetBrains Mono',monospace; font-weight:600; color:#9333ea; }
-
-        /* Journal */
-        .journal-entry { background:rgba(147,51,234,0.04); border:1px solid rgba(147,51,234,0.08); border-radius:12px; padding:16px; margin:10px 0; }
-        .journal-date { font-size:11px; color:rgba(147,51,234,0.5); letter-spacing:1px; margin-bottom:6px; }
-        .journal-text { font-size:14px; color:rgba(255,255,255,0.6); line-height:1.6; }
-
-        /* Toast & Modal */
-        .toast { position:fixed; top:20px; left:50%; transform:translateX(-50%) translateY(-100px); background:rgba(147,51,234,0.9); color:#fff; padding:12px 24px; border-radius:10px; font-size:14px; font-weight:500; z-index:999; transition:transform 0.4s; backdrop-filter:blur(10px); }
-        .toast.show { transform:translateX(-50%) translateY(0); }
-        .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.8); display:none; align-items:center; justify-content:center; z-index:998; backdrop-filter:blur(4px); }
-        .modal-overlay.show { display:flex; }
-        .modal { background:#12121a; border:1px solid rgba(147,51,234,0.15); border-radius:16px; padding:28px; max-width:380px; width:90%; text-align:center; }
-        .modal h3 { font-size:20px; color:#9333ea; margin-bottom:12px; }
-        .modal p { font-size:14px; color:rgba(255,255,255,0.5); margin-bottom:20px; line-height:1.6; }
-        .modal-buttons { display:flex; gap:12px; }
-        .modal-buttons .btn { flex:1; }
-
-        .back-link { font-size:13px; color:rgba(147,51,234,0.4); cursor:pointer; text-align:center; display:block; margin:12px 0; }
-        .back-link:hover { color:#9333ea; }
-        .fine-print { text-align:center; padding:30px 0; font-size:11px; color:rgba(255,255,255,0.12); line-height:1.8; }
-
-        @media (max-width:500px) { .header h1{font-size:26px;} .result-score{font-size:48px;} }
+        /* CTA button in chat */
+        .cta-row { align-self:flex-start; max-width:85%; animation:msgIn 0.3s ease; margin:4px 0; }
+        .cta-btn {
+            display:block; padding:14px 24px; border-radius:14px; font-family:'Inter',sans-serif;
+            font-size:15px; font-weight:600; text-decoration:none; text-align:center;
+            background:linear-gradient(135deg,#9333ea,#c084fc); color:#fff;
+            box-shadow:0 4px 20px rgba(147,51,234,0.3); transition:all 0.3s;
+        }
+        .cta-btn:hover { transform:translateY(-2px); box-shadow:0 6px 30px rgba(147,51,234,0.4); }
     </style>
 </head>
 <body>
 
-<div class="toast" id="toast"></div>
-<div class="modal-overlay" id="relapseModal">
-    <div class="modal">
-        <h3>log a relapse? 🤭</h3>
-        <p>it's okay ~ honesty is part of recovery ~ this resets ur clean streak but ur progress stays ~</p>
-        <div class="modal-buttons">
-            <button class="btn btn-outline" onclick="closeModal()">nah i'm clean</button>
-            <button class="btn btn-danger" onclick="confirmRelapse()">i relapsed 💔</button>
-        </div>
+<!-- Landing -->
+<div class="landing" id="landing">
+    <div class="landing-icon">🛋️</div>
+    <h1>therapy4addict</h1>
+    <p class="sub">treating addictions ur real therapist<br>will never know about ~</p>
+    <button class="start-btn" onclick="startSession()">start ur session 💜</button>
+    <p class="fine">everything said here stays here ~ 🤭</p>
+</div>
+
+<!-- Chat -->
+<div class="chat-header">
+    <div class="avatar">🧠</div>
+    <div class="header-info">
+        <h2>therapy4addict</h2>
+        <div class="header-status">in session</div>
     </div>
 </div>
 
-<div class="container">
-    <div class="header">
-        <h1>🧠 therapy4addict</h1>
-        <p class="tagline">treating addictions ur real therapist will never know about ~</p>
-    </div>
-
-    <!-- LANDING -->
-    <div class="screen active" id="screen-landing">
-        <div class="card center">
-            <p style="font-size:40px; margin-bottom:12px;">🛋️</p>
-            <p style="font-size:16px; color:rgba(255,255,255,0.6); line-height:1.7;">
-                u can't tell ur real therapist about this ~<br>
-                that's why we're here 💜
-            </p>
-        </div>
-        <button class="btn btn-primary" onclick="showScreen('screen-intake-start')">start ur assessment 🧠</button>
-        <button class="btn btn-outline" onclick="showScreen('screen-login')">returning patient</button>
-        <div class="fine-print">
-            100% of patients relapse ~ but we don't judge 🤭
-        </div>
-    </div>
-
-    <!-- LOGIN -->
-    <div class="screen" id="screen-login">
-        <div class="card">
-            <div class="card-title">welcome back ~</div>
-            <div class="input-group">
-                <label>username</label>
-                <input type="text" id="login-username" placeholder="@username">
-            </div>
-            <div class="input-group">
-                <label>password</label>
-                <input type="password" id="login-password" placeholder="ur password ~">
-            </div>
-        </div>
-        <button class="btn btn-primary" onclick="doLogin()">log in 💜</button>
-        <p class="back-link" onclick="showScreen('screen-landing')">← back</p>
-    </div>
-
-    <!-- INTAKE START -->
-    <div class="screen" id="screen-intake-start">
-        <div class="card">
-            <div class="card-title">before we begin ~</div>
-            <p style="font-size:14px; color:rgba(255,255,255,0.4); line-height:1.7; margin-bottom:16px;">
-                think of this as ur first session ~ answer honestly ~ no one's judging u here 💜
-            </p>
-            <div class="input-group">
-                <label>what should we call u?</label>
-                <input type="text" id="intake-username" placeholder="@username">
-            </div>
-        </div>
-        <button class="btn btn-primary" onclick="beginIntake()">begin assessment 🧠</button>
-        <p class="back-link" onclick="showScreen('screen-landing')">← back</p>
-    </div>
-
-    <!-- INTAKE QUESTIONS -->
-    <div class="screen" id="screen-intake">
-        <div class="progress-bar" id="progress-bar"></div>
-        <div class="step-counter" id="step-counter"></div>
-        <div class="card" id="intake-card">
-            <!-- dynamically filled -->
-        </div>
-    </div>
-
-    <!-- RESULTS -->
-    <div class="screen" id="screen-results">
-        <div class="card center">
-            <p class="dim" style="font-size:12px; letter-spacing:3px; text-transform:uppercase; margin-bottom:12px;">assessment result</p>
-            <div style="display:flex; align-items:baseline; justify-content:center; gap:4px;">
-                <div class="result-score" id="res-score">0</div>
-                <span class="dim" style="font-size:20px;">/10</span>
-            </div>
-            <div class="result-bar-bg"><div class="result-bar-fill" id="res-bar" style="width:0%"></div></div>
-            <div class="result-label" id="res-label"></div>
-            <p class="result-desc" id="res-desc"></p>
-        </div>
-        <div class="card">
-            <div class="card-title">therapist's note</div>
-            <p style="font-size:14px; color:rgba(255,255,255,0.4); line-height:1.8;" id="res-note"></p>
-        </div>
-        <button class="btn btn-primary" onclick="showScreen('screen-signup')">create patient account 💜</button>
-        <p class="back-link" onclick="showScreen('screen-intake-start')">retake assessment</p>
-    </div>
-
-    <!-- SIGNUP -->
-    <div class="screen" id="screen-signup">
-        <div class="card">
-            <div class="card-title">create ur patient file ~</div>
-            <p style="font-size:13px; color:rgba(255,255,255,0.4); margin-bottom:14px;">set a password so u can check in between sessions 💜</p>
-            <div class="input-group">
-                <label>password</label>
-                <input type="password" id="signup-password" placeholder="create a password ~">
-            </div>
-        </div>
-        <button class="btn btn-primary" onclick="createAccount()">open my file 💜</button>
-        <p class="back-link" onclick="showScreen('screen-results')">← back</p>
-    </div>
-
-    <!-- DASHBOARD -->
-    <div class="screen" id="screen-dashboard">
-        <div class="card center">
-            <p style="font-size:13px; color:rgba(255,255,255,0.3);">patient file</p>
-            <p style="font-size:18px; font-weight:600; color:#c084fc;" id="dash-name"></p>
-            <p class="dim" style="font-size:11px; margin-top:4px;" id="dash-diagnosis"></p>
-        </div>
-
-        <div class="card">
-            <div style="display:flex; justify-content:space-around; text-align:center; padding:8px 0;">
-                <div><div class="mono purple" style="font-size:22px;" id="dash-sessions">0</div><div class="dim" style="font-size:10px; letter-spacing:2px; margin-top:4px;">SESSIONS</div></div>
-                <div><div class="mono purple" style="font-size:22px;" id="dash-streak">0</div><div class="dim" style="font-size:10px; letter-spacing:2px; margin-top:4px;">DAYS CLEAN</div></div>
-                <div><div class="mono" style="font-size:22px; color:#ff4444;" id="dash-relapses">0</div><div class="dim" style="font-size:10px; letter-spacing:2px; margin-top:4px;">RELAPSES</div></div>
-            </div>
-        </div>
-
-        <div class="nav-card" onclick="showScreen('screen-sessions')">
-            <div>
-                <div class="nav-title">book a session</div>
-                <div class="nav-sub">therapy isn't free ~ but neither is ur addiction</div>
-            </div>
-            <div class="nav-arrow">→</div>
-        </div>
-
-        <div class="nav-card" onclick="showScreen('screen-tracker')">
-            <div>
-                <div class="nav-title">relapse tracker</div>
-                <div class="nav-sub"><span id="dash-streak-preview">0</span> days clean · <span id="dash-relapses-preview">0</span> relapses</div>
-            </div>
-            <div class="nav-arrow">→</div>
-        </div>
-
-        <div class="nav-card" onclick="showScreen('screen-journal')">
-            <div>
-                <div class="nav-title">therapy journal</div>
-                <div class="nav-sub">write it out ~ it helps</div>
-            </div>
-            <div class="nav-arrow">→</div>
-        </div>
-
-        <div class="nav-card" onclick="showScreen('screen-history')">
-            <div>
-                <div class="nav-title">session history</div>
-                <div class="nav-sub">ur treatment record</div>
-            </div>
-            <div class="nav-arrow">→</div>
-        </div>
-
-        <div class="fine-print">therapy4addict ~ est. 2026 💜</div>
-    </div>
-
-    <!-- BOOK A SESSION -->
-    <div class="screen" id="screen-sessions">
-        <p class="back-link" onclick="showScreen('screen-dashboard')">← back to dashboard</p>
-        <div class="card">
-            <div class="card-title">book a session ~</div>
-            <p style="font-size:13px; color:rgba(255,255,255,0.35); margin-bottom:14px;">choose ur treatment level 💜</p>
-        </div>
-
-        <div class="session-card" onclick="bookSession(10,'Check-in','THRONE_LINK_10')">
-            <div class="session-left">
-                <div class="session-emoji">💬</div>
-                <div>
-                    <div class="session-name">check-in</div>
-                    <div class="session-desc">quick session ~ how are u doing?</div>
-                </div>
-            </div>
-            <div class="session-price">$10</div>
-        </div>
-
-        <div class="session-card" onclick="bookSession(25,'Therapy Session','THRONE_LINK_25')">
-            <div class="session-left">
-                <div class="session-emoji">🛋️</div>
-                <div>
-                    <div class="session-name">therapy session</div>
-                    <div class="session-desc">let's dig deeper ~</div>
-                </div>
-            </div>
-            <div class="session-price">$25</div>
-        </div>
-
-        <div class="session-card" onclick="bookSession(50,'Deep Dive','THRONE_LINK_50')">
-            <div class="session-left">
-                <div class="session-emoji">🧠</div>
-                <div>
-                    <div class="session-name">deep dive</div>
-                    <div class="session-desc">intensive session ~ no holding back</div>
-                </div>
-            </div>
-            <div class="session-price">$50</div>
-        </div>
-
-        <div class="session-card" onclick="bookSession(100,'Full Treatment','THRONE_LINK_100')">
-            <div class="session-left">
-                <div class="session-emoji">💊</div>
-                <div>
-                    <div class="session-name">full treatment</div>
-                    <div class="session-desc">the session u actually need ~</div>
-                </div>
-            </div>
-            <div class="session-price">$100</div>
-        </div>
-    </div>
-
-    <!-- RELAPSE TRACKER -->
-    <div class="screen" id="screen-tracker">
-        <p class="back-link" onclick="showScreen('screen-dashboard')">← back to dashboard</p>
-
-        <div class="card" style="padding:28px; text-align:center; border-color:rgba(147,51,234,0.15);">
-            <div style="display:flex; align-items:center; justify-content:center; gap:20px;">
-                <div>
-                    <div class="relapse-big" id="tracker-total">0</div>
-                    <div class="dim" style="font-size:10px; letter-spacing:2px; text-transform:uppercase; margin-top:6px;">total relapses</div>
-                </div>
-                <div style="width:1px; height:50px; background:rgba(255,255,255,0.06);"></div>
-                <div>
-                    <div class="mono purple" style="font-size:42px; line-height:1;" id="tracker-streak">0</div>
-                    <div class="dim" style="font-size:10px; letter-spacing:2px; text-transform:uppercase; margin-top:6px;">days clean</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card" style="padding:16px 20px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <span style="font-size:12px; color:rgba(255,255,255,0.4);">recovery progress</span>
-                <span class="mono purple" style="font-size:12px;" id="tracker-streak-pct">0%</span>
-            </div>
-            <div class="streak-bar-bg" style="height:8px; border-radius:4px;">
-                <div class="streak-bar-fill" id="tracker-streak-bar" style="width:0%; height:100%; border-radius:4px;"></div>
-            </div>
-            <div style="display:flex; justify-content:space-between; margin-top:6px;">
-                <span class="dim" style="font-size:10px;">day 0</span>
-                <span class="dim" style="font-size:10px;">30 days → graduated 💜</span>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">last 28 days</div>
-            <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:6px;">
-                <span class="dim center" style="font-size:9px; letter-spacing:1px;">M</span>
-                <span class="dim center" style="font-size:9px; letter-spacing:1px;">T</span>
-                <span class="dim center" style="font-size:9px; letter-spacing:1px;">W</span>
-                <span class="dim center" style="font-size:9px; letter-spacing:1px;">T</span>
-                <span class="dim center" style="font-size:9px; letter-spacing:1px;">F</span>
-                <span class="dim center" style="font-size:9px; letter-spacing:1px;">S</span>
-                <span class="dim center" style="font-size:9px; letter-spacing:1px;">S</span>
-            </div>
-            <div class="relapse-calendar" id="tracker-calendar"></div>
-            <div style="display:flex; justify-content:center; gap:20px; margin-top:14px;">
-                <div style="display:flex; align-items:center; gap:6px;">
-                    <div style="width:10px; height:10px; border-radius:2px; background:rgba(255,0,0,0.25); border:1px solid rgba(255,0,0,0.35);"></div>
-                    <span class="dim" style="font-size:10px;">relapsed</span>
-                </div>
-                <div style="display:flex; align-items:center; gap:6px;">
-                    <div style="width:10px; height:10px; border-radius:2px; background:rgba(0,255,100,0.12); border:1px solid rgba(0,255,100,0.2);"></div>
-                    <span class="dim" style="font-size:10px;">clean</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">stats</div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                <div style="background:rgba(147,51,234,0.06); border-radius:10px; padding:14px; text-align:center;">
-                    <div class="mono purple" style="font-size:22px;" id="tracker-best">0</div>
-                    <div class="dim" style="font-size:9px; letter-spacing:2px; margin-top:4px; text-transform:uppercase;">best streak</div>
-                </div>
-                <div style="background:rgba(255,0,0,0.06); border-radius:10px; padding:14px; text-align:center;">
-                    <div class="mono" style="font-size:22px; color:#ff4444;" id="tracker-weekly">0</div>
-                    <div class="dim" style="font-size:9px; letter-spacing:2px; margin-top:4px; text-transform:uppercase;">this week</div>
-                </div>
-            </div>
-        </div>
-
-        <button class="btn btn-danger" onclick="openModal()" style="margin-top:4px;">log relapse 💔</button>
-        <p class="dim center" style="font-size:11px; margin-top:8px;">honesty is the first step ~</p>
-    </div>
-
-    <!-- JOURNAL -->
-    <div class="screen" id="screen-journal">
-        <p class="back-link" onclick="showScreen('screen-dashboard')">← back to dashboard</p>
-        <div class="card">
-            <div class="card-title">therapy journal ~</div>
-            <p style="font-size:13px; color:rgba(255,255,255,0.35); margin-bottom:14px;">
-                write what u're feeling ~ no one sees this but u 💜
-            </p>
-            <div class="input-group">
-                <textarea id="journal-entry" rows="5" placeholder="how are u feeling right now? what triggered u today? what are u struggling with? ~"></textarea>
-            </div>
-        </div>
-        <button class="btn btn-primary" onclick="saveJournal()">save entry 💜</button>
-
-        <div class="card" style="margin-top:16px;">
-            <div class="card-title">past entries</div>
-            <div id="journal-list">
-                <p class="dim" style="font-size:13px; font-style:italic;">no entries yet ~ start writing 💜</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- SESSION HISTORY -->
-    <div class="screen" id="screen-history">
-        <p class="back-link" onclick="showScreen('screen-dashboard')">← back to dashboard</p>
-        <div class="card">
-            <div class="card-title">session history</div>
-            <ul class="tx-list" id="tx-list"></ul>
-        </div>
-    </div>
-
-</div>
+<div class="chat-area" id="chat"></div>
+<div id="bottom-tray"></div>
 
 <script>
-let state = null;
-let intakeStep = 0;
-let intakeScore = 0;
-let intakeUsername = '';
-let intakeAnswers = [];
-let journalEntries = JSON.parse(localStorage.getItem('t4a_journal') || '[]');
+const chat = document.getElementById('chat');
+const tray = document.getElementById('bottom-tray');
+let username = '';
+let answers = {};
+let totalScore = 0;
 
-const intakeQuestions = [
-    { type:'choice', q:"how often do u find urself relapsing? ~", sub:"be honest ~ this is a safe space", opts:[
-        { text:"once a month or less", emoji:"😅", score:1 },
-        { text:"a few times a week", emoji:"😬", score:2 },
-        { text:"every day", emoji:"💀", score:3 },
-        { text:"multiple times a day", emoji:"🧠", score:4 }
+// Conversation script
+const script = [
+    // 0: ask name
+    { therapist:["hi ~ welcome 💜","this is a safe space ~ no judgment here ~","what should i call u?"], input:'text', placeholder:'type ur name ~' },
+    // 1: greeting + first q
+    { therapist:["{name}","i like that ~","so tell me ~ what brought u here today?"], options:[
+        { text:"i think i might have a problem", emoji:"🤔", score:1, key:"reason" },
+        { text:"someone told me to come here", emoji:"👀", score:1, key:"reason" },
+        { text:"i know i have a problem", emoji:"💜", score:2, key:"reason" },
+        { text:"i can't stop", emoji:"💀", score:3, key:"reason" }
     ]},
-    { type:'choice', q:"how much have u spent on this in the last month? ~", sub:"no judgment ~ just an assessment", opts:[
-        { text:"less than $50", emoji:"💵", score:1 },
-        { text:"$50 - $200", emoji:"💸", score:2 },
-        { text:"$200 - $500", emoji:"🔥", score:3 },
-        { text:"i'm too scared to check", emoji:"💀", score:4 }
+    // 2
+    { therapist:["okay ~","and how long has this been going on?","be honest with me ~"], options:[
+        { text:"a few weeks", emoji:"📅", score:1, key:"duration" },
+        { text:"a few months", emoji:"🗓️", score:2, key:"duration" },
+        { text:"over a year", emoji:"⏳", score:3, key:"duration" },
+        { text:"i don't even remember when it started", emoji:"💀", score:4, key:"duration" }
     ]},
-    { type:'choice', q:"have u tried to stop before? ~", sub:"most addicts have tried multiple times ~ that's normal", opts:[
-        { text:"never really tried", emoji:"🤷", score:1 },
-        { text:"once or twice", emoji:"🤔", score:2 },
-        { text:"more times than i can count", emoji:"😩", score:3 },
-        { text:"i've completely given up trying", emoji:"💔", score:4 }
+    // 3
+    { therapist:["mhm ~","and how often do u find urself relapsing?"], options:[
+        { text:"once a month or less", emoji:"😅", score:1, key:"frequency" },
+        { text:"a few times a week", emoji:"😬", score:2, key:"frequency" },
+        { text:"every day", emoji:"💀", score:3, key:"frequency" },
+        { text:"multiple times a day", emoji:"🧠", score:4, key:"frequency" }
     ]},
-    { type:'choice', q:"do people in ur life know about this? ~", sub:"secrecy is a symptom", opts:[
-        { text:"yeah it's not that deep", emoji:"😎", score:0 },
-        { text:"one or two people", emoji:"🤫", score:1 },
-        { text:"nobody knows", emoji:"😶", score:3 },
-        { text:"i lie to people to hide it", emoji:"🎭", score:4 }
+    // 4
+    { therapist:["i see ~","how much would u say u've spent on this?","in the last month ~"], options:[
+        { text:"less than $50", emoji:"💵", score:1, key:"spending" },
+        { text:"$50 - $200", emoji:"💸", score:2, key:"spending" },
+        { text:"$200 - $500", emoji:"🔥", score:3, key:"spending" },
+        { text:"i'm scared to check", emoji:"💀", score:4, key:"spending" }
     ]},
-    { type:'choice', q:"when u try to stop ~ how long do u last? ~", sub:"the gaps between relapses tell a lot", opts:[
-        { text:"weeks at a time", emoji:"💪", score:1 },
-        { text:"a few days", emoji:"😤", score:2 },
-        { text:"less than 24 hours", emoji:"😬", score:3 },
-        { text:"i can't even start", emoji:"💀", score:4 }
+    // 5
+    { therapist:["that's more common than u think ~","here's an important one ~","do people in ur life know about this?"], options:[
+        { text:"yeah it's not a secret", emoji:"😎", score:0, key:"secrecy" },
+        { text:"one or two people know", emoji:"🤫", score:1, key:"secrecy" },
+        { text:"nobody knows", emoji:"😶", score:3, key:"secrecy" },
+        { text:"i actively lie to hide it", emoji:"🎭", score:4, key:"secrecy" }
     ]},
-    { type:'choice', q:"is it affecting ur real life? ~", sub:"relationships ~ work ~ money ~ sleep", opts:[
-        { text:"not really ~ it's just a thing i do", emoji:"😎", score:0 },
-        { text:"starting to notice some effects", emoji:"😅", score:1 },
-        { text:"it's definitely causing problems", emoji:"😬", score:3 },
-        { text:"it's ruining everything", emoji:"💀", score:4 }
+    // 6
+    { therapist:["secrecy is one of the biggest signs ~","when u try to stop ~ how long do u actually last?"], options:[
+        { text:"weeks at a time", emoji:"💪", score:1, key:"willpower" },
+        { text:"a few days", emoji:"😤", score:2, key:"willpower" },
+        { text:"less than 24 hours", emoji:"😬", score:3, key:"willpower" },
+        { text:"i can't even start trying", emoji:"💀", score:4, key:"willpower" }
     ]},
-    { type:'choice', q:"last question ~ why are u here? ~", sub:"this matters more than u think", opts:[
-        { text:"just curious", emoji:"🤔", score:0 },
-        { text:"someone told me to check this out", emoji:"👀", score:1 },
-        { text:"i think i might need help", emoji:"🥺", score:2 },
-        { text:"i know i need help", emoji:"💜", score:3 }
+    // 7
+    { therapist:["okay ~","and when u do relapse ~","how do u feel after?"], options:[
+        { text:"guilty ~ i promise to stop", emoji:"😔", score:1, key:"aftermath" },
+        { text:"shame ~ but i do it again anyway", emoji:"😩", score:2, key:"aftermath" },
+        { text:"nothing ~ it's just normal now", emoji:"😶", score:3, key:"aftermath" },
+        { text:"i enjoy it ~ the shame is part of it", emoji:"🤭", score:4, key:"aftermath" }
+    ]},
+    // 8
+    { therapist:["that tells me a lot about where u are ~","last question {name} ~","what do u actually want from this?"], options:[
+        { text:"i want to understand myself better", emoji:"🤔", score:1, key:"goal" },
+        { text:"i want to control it", emoji:"💪", score:1, key:"goal" },
+        { text:"i want someone who gets it", emoji:"💜", score:2, key:"goal" },
+        { text:"i don't know anymore", emoji:"🥺", score:3, key:"goal" }
     ]}
 ];
 
-const results = [
-    { min:0, max:3, label:"mild ~ early stage", desc:"u're not deep yet ~ but u're here for a reason 🤭 most addictions start exactly where u are right now ~ catch it before it catches u ~", note:"patient shows early-stage patterns. awareness is high which is a good sign. recommend monitoring and check-ins to prevent escalation. the fact they took this assessment suggests subconscious recognition of a developing problem ~", pct:20 },
-    { min:3.1, max:5.5, label:"moderate ~ developing", desc:"u're past the 'i can stop whenever' phase 💜 ur brain is already rewiring itself around this ~ the patterns are forming and they're getting harder to break ~", note:"patient displays moderate dependency with established behavioral patterns. the gap between intention and action is widening. denial mechanisms are likely active. regular sessions recommended to interrupt the cycle before it becomes fully autonomous ~", pct:45 },
-    { min:5.6, max:7.5, label:"severe ~ dependent", desc:"this isn't a habit anymore ~ it's a dependency 🤭 u probably knew the result before u took the test ~ ur brain doesn't give u a choice anymore ~", note:"patient presents severe dependency with significant life impact. the addiction has likely become self-sustaining — relapses happen on autopilot rather than by conscious decision. intensive therapy required. the secrecy and isolation patterns suggest deep shame which paradoxically fuels the cycle ~", pct:70 },
-    { min:7.6, max:10, label:"critical ~ full addiction", desc:"u are in crisis 💜 this isn't something u can fix alone ~ every hour u wait it gets deeper ~ therapy4addict was built for exactly where u are right now ~", note:"patient is in critical stage addiction with complete loss of autonomous control. the addiction has become the organizing principle of their daily life. everything else — relationships, work, sleep, finances — is secondary. immediate intensive intervention needed. this patient needs consistent ongoing therapy and accountability ~", pct:95 }
+const diagnoses = [
+    { min:0, max:6, label:"early stage", response:["okay {name} ~ here's what i think","u're not deep yet ~ but the fact that u're here tells me something ~","u can feel it building can't u ~","let's keep an eye on this before it becomes something u can't control ~"] },
+    { min:7, max:14, label:"developing dependency", response:["alright {name} ~ i'm going to be straight with u","u're past the 'it's just a habit' stage ~","the patterns are forming ~ the gaps between relapses are getting shorter ~","u need regular sessions before this takes over completely ~"] },
+    { min:15, max:22, label:"active addiction", response:["{name} ~","u already knew what i was going to say didn't u 🤭","this isn't something u can think ur way out of anymore ~","ur brain has rewired itself around this ~ u need help ~ and that's okay ~"] },
+    { min:23, max:35, label:"severe addiction", response:["{name} ~ i need u to hear this","u are in crisis ~ this has taken over ur life ~","every hour u wait it gets deeper ~","u need intensive ongoing therapy ~ and i'm here for that ~","dm me ~ let's start real treatment 💜"] }
 ];
 
-const api = (path, body) => body
-    ? fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}).then(r=>r.json())
-    : fetch(path).then(r=>r.json());
-
-function showScreen(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    if (id==='screen-dashboard') updateDashboard();
-    if (id==='screen-tracker') updateTracker();
-    if (id==='screen-history') updateHistory();
-    if (id==='screen-journal') renderJournal();
+function startSession() {
+    document.getElementById('landing').classList.add('hidden');
+    runStep(0);
 }
 
-function showToast(msg) {
-    const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
-    setTimeout(()=>t.classList.remove('show'),3000);
+function scrollDown() {
+    setTimeout(() => { chat.scrollTop = chat.scrollHeight; }, 50);
 }
 
-function getAccountId() { return localStorage.getItem('t4a_id'); }
-function setAccountId(id) { localStorage.setItem('t4a_id', id); }
-function clearAccountId() { localStorage.removeItem('t4a_id'); }
-
-async function loadAccount() {
-    const id = getAccountId();
-    if (!id) return null;
-    try {
-        const resp = await fetch('/api/account/'+id);
-        if (!resp.ok) { clearAccountId(); return null; }
-        const data = await resp.json();
-        if (data && data.id) { state = data; return state; }
-        clearAccountId(); return null;
-    } catch(e) { clearAccountId(); return null; }
+function addGap() {
+    const g = document.createElement('div');
+    g.className = 'msg-gap';
+    chat.appendChild(g);
 }
 
-function doLogin() {
-    const username = document.getElementById('login-username').value.trim();
-    const password = document.getElementById('login-password').value;
-    if(!username||!password){showToast('fill in both fields ~ 🤭');return;}
-    api('/api/login',{username,password}).then(data=>{
-        if(data.error){showToast(data.error);return;}
-        state=data;
-        setAccountId(data.id);
-        showScreen('screen-dashboard');
-        showToast('welcome back ~ 💜');
+function addTherapistMsg(text) {
+    return new Promise(resolve => {
+        // Show typing
+        const typing = document.createElement('div');
+        typing.className = 'typing';
+        typing.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+        chat.appendChild(typing);
+        scrollDown();
+
+        const delay = Math.min(600 + text.length * 20, 1800);
+        setTimeout(() => {
+            chat.removeChild(typing);
+            const row = document.createElement('div');
+            row.className = 'msg-row therapist';
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.textContent = text.replace('{name}', username);
+            row.appendChild(bubble);
+            chat.appendChild(row);
+            scrollDown();
+            resolve();
+        }, delay);
     });
 }
 
-// INTAKE
-function beginIntake() {
-    intakeUsername = document.getElementById('intake-username').value.trim();
-    if(!intakeUsername){showToast('we need something to call u ~ 🤭');return;}
-    intakeStep=0; intakeScore=0; intakeAnswers=[];
-    showScreen('screen-intake');
-    renderIntake();
+function addPatientMsg(text) {
+    const row = document.createElement('div');
+    row.className = 'msg-row patient';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.textContent = text;
+    row.appendChild(bubble);
+    chat.appendChild(row);
+    scrollDown();
 }
 
-function renderIntake() {
-    const q = intakeQuestions[intakeStep];
-    const total = intakeQuestions.length;
+async function sendTherapistMessages(messages) {
+    for (let i = 0; i < messages.length; i++) {
+        await addTherapistMsg(messages[i]);
+    }
+}
 
-    // Progress bar
-    let bar='';
-    for(let i=0;i<total;i++) bar+=`<div class="progress-seg ${i<intakeStep?'done':''} ${i===intakeStep?'current':''}"></div>`;
-    document.getElementById('progress-bar').innerHTML=bar;
-    document.getElementById('step-counter').textContent=`${intakeStep+1} / ${total}`;
-
-    let html = `<p class="intake-step">${q.q}</p>`;
-    html += `<p class="intake-sub">${q.sub}</p>`;
-    html += `<div class="intake-options">`;
-    q.opts.forEach((o,i) => {
-        html += `<div class="intake-opt" onclick="answerIntake(${o.score},'${o.text.replace(/'/g,"\\'")}')"><span class="opt-emoji">${o.emoji}</span>${o.text}</div>`;
+function showOptions(options) {
+    tray.innerHTML = '';
+    const optTray = document.createElement('div');
+    optTray.className = 'options-tray';
+    options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        btn.innerHTML = `<span class="opt-emoji">${opt.emoji}</span>${opt.text}`;
+        btn.onclick = () => selectOption(opt);
+        optTray.appendChild(btn);
     });
-    html += `</div>`;
-    document.getElementById('intake-card').innerHTML = html;
+    tray.appendChild(optTray);
+    scrollDown();
 }
 
-function answerIntake(score, text) {
-    intakeScore += score;
-    intakeAnswers.push(text);
-    intakeStep++;
-    if(intakeStep >= intakeQuestions.length) {
-        showIntakeResults();
+function showTextInput(placeholder) {
+    tray.innerHTML = '';
+    const inputTray = document.createElement('div');
+    inputTray.className = 'input-tray';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.placeholder = placeholder;
+    input.id = 'user-input';
+    const sendBtn = document.createElement('button');
+    sendBtn.className = 'send-btn';
+    sendBtn.textContent = '→';
+    const submit = () => {
+        const val = input.value.trim();
+        if (!val) return;
+        username = val;
+        addPatientMsg(val);
+        tray.innerHTML = '';
+        addGap();
+        runStep(1);
+    };
+    sendBtn.onclick = submit;
+    input.onkeydown = (e) => { if (e.key === 'Enter') submit(); };
+    inputTray.appendChild(input);
+    inputTray.appendChild(sendBtn);
+    tray.appendChild(inputTray);
+    setTimeout(() => input.focus(), 300);
+    scrollDown();
+}
+
+let currentStep = 0;
+
+async function runStep(step) {
+    currentStep = step;
+    const s = script[step];
+    if (!s) { showResults(); return; }
+
+    await sendTherapistMessages(s.therapist);
+    addGap();
+
+    if (s.input === 'text') {
+        showTextInput(s.placeholder);
+    } else if (s.options) {
+        showOptions(s.options);
+    }
+}
+
+async function selectOption(opt) {
+    addPatientMsg(opt.text);
+    tray.innerHTML = '';
+    addGap();
+
+    totalScore += opt.score;
+    if (opt.key) answers[opt.key] = opt.text;
+
+    // next step
+    const next = currentStep + 1;
+    if (next < script.length) {
+        runStep(next);
     } else {
-        renderIntake();
+        showResults();
     }
 }
 
-function showIntakeResults() {
-    showScreen('screen-results');
-    const maxScore = 27;
-    const displayScore = Math.round((intakeScore / maxScore) * 10 * 10) / 10;
-    const r = results.find(r => displayScore >= r.min && displayScore <= r.max) || results[results.length-1];
+async function showResults() {
+    const diag = diagnoses.find(d => totalScore >= d.min && totalScore <= d.max) || diagnoses[diagnoses.length - 1];
 
-    document.getElementById('res-score').textContent = displayScore % 1 === 0 ? displayScore.toFixed(0) : displayScore.toFixed(1);
-    document.getElementById('res-label').textContent = r.label;
-    document.getElementById('res-desc').textContent = r.desc;
-    document.getElementById('res-note').textContent = r.note;
-    setTimeout(()=>{document.getElementById('res-bar').style.width=(displayScore/10*100)+'%';},200);
+    // Send to backend (→ Telegram)
+    const answersText = Object.entries(answers).map(([k,v]) => `${k}: ${v}`).join('\n');
+    fetch('/api/quiz-result', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            username: username,
+            score: totalScore + '/35',
+            level: diag.label,
+            answers: answersText
+        })
+    }).catch(() => {});
 
-    // Send to Telegram
-    const answersText = intakeQuestions.map((q,i) => `${i+1}. ${intakeAnswers[i]||'?'}`).join('\n');
-    api('/api/quiz-result',{username:intakeUsername,score:displayScore+'/10',level:r.label,answers:answersText});
+    addGap();
+
+    // Therapist delivers diagnosis messages
+    await sendTherapistMessages(diag.response);
+    addGap();
+
+    // Score card
+    const displayScore = Math.round((totalScore / 35) * 10 * 10) / 10;
+    const card = document.createElement('div');
+    card.className = 'results-card';
+    card.innerHTML = `
+        <div style="font-size:11px; color:rgba(147,51,234,0.5); text-transform:uppercase; letter-spacing:2px; text-align:center; margin-bottom:8px;">session assessment</div>
+        <div class="results-score">${displayScore % 1 === 0 ? displayScore.toFixed(0) : displayScore.toFixed(1)}<span style="font-size:20px;color:rgba(255,255,255,0.2);">/10</span></div>
+        <div class="results-bar"><div class="results-bar-fill" id="res-bar-fill" style="width:0%"></div></div>
+        <div class="results-label">${diag.label}</div>
+    `;
+    chat.appendChild(card);
+    scrollDown();
+
+    setTimeout(() => {
+        document.getElementById('res-bar-fill').style.width = (displayScore / 10 * 100) + '%';
+    }, 200);
+
+    // Wait then send CTA
+    await new Promise(r => setTimeout(r, 1500));
+
+    await addTherapistMsg("ur session summary is ready ~");
+    await addTherapistMsg("if u want to keep going ~ u know where to find me 💜");
+    addGap();
+
+    // CTA button
+    const ctaRow = document.createElement('div');
+    ctaRow.className = 'cta-row';
+    ctaRow.innerHTML = `<a class="cta-btn" href="https://twitter.com/messages/compose?recipient_id=TWITTER_ID" target="_blank">dm @therapy4addict on twitter 💜</a>`;
+    chat.appendChild(ctaRow);
+    scrollDown();
+
+    // Also show "take again" after a moment
+    await new Promise(r => setTimeout(r, 1000));
+    const again = document.createElement('div');
+    again.className = 'cta-row';
+    again.innerHTML = `<a class="cta-btn" href="javascript:location.reload()" style="background:transparent; border:1px solid rgba(147,51,234,0.3); box-shadow:none; color:#c084fc;">start over</a>`;
+    chat.appendChild(again);
+    scrollDown();
 }
-
-// ACCOUNT
-function createAccount() {
-    const password = document.getElementById('signup-password').value;
-    if(!password){showToast('u need a password ~ 🤭');return;}
-    const maxScore = 27;
-    const displayScore = Math.round((intakeScore / maxScore) * 10 * 10) / 10;
-    const r = results.find(r => displayScore >= r.min && displayScore <= r.max) || results[results.length-1];
-    api('/api/account',{name:intakeUsername,username:intakeUsername,password,level:r.label,score:intakeScore}).then(account=>{
-        if(account.error){showToast(account.error);return;}
-        state=account;
-        setAccountId(account.id);
-        showScreen('screen-dashboard');
-        showToast('patient file created ~ welcome 💜');
-    });
-}
-
-// DASHBOARD
-function updateDashboard() {
-    if(!state)return;
-    loadAccount().then(()=>{
-        if(!state)return;
-        document.getElementById('dash-name').textContent=(state.username||state.name)+' ~';
-        document.getElementById('dash-diagnosis').textContent='diagnosis: '+state.level;
-        document.getElementById('dash-sessions').textContent=state.sessions||0;
-        document.getElementById('dash-streak').textContent=state.streak_days||0;
-        document.getElementById('dash-relapses').textContent=state.relapses||0;
-        document.getElementById('dash-streak-preview').textContent=state.streak_days||0;
-        document.getElementById('dash-relapses-preview').textContent=state.relapses||0;
-    });
-}
-
-// SESSIONS
-function bookSession(amount, name, url) {
-    if(url.startsWith('THRONE_LINK')){
-        showToast('throne link coming soon ~ dm @therapy4addict 💜');
-        return;
-    }
-    window.open(url,'_blank');
-    showToast('booking ur session ~ 💜');
-}
-
-// RELAPSE
-function openModal(){document.getElementById('relapseModal').classList.add('show');}
-function closeModal(){document.getElementById('relapseModal').classList.remove('show');}
-function confirmRelapse() {
-    api('/api/account/'+state.id+'/relapse',{}).then(()=>{
-        closeModal();
-        loadAccount().then(()=>{updateTracker();updateDashboard();});
-        const msgs=['streak reset ~ but u logged it ~ that takes courage 💜','day 0 again ~ but awareness is progress 🧠','relapse logged ~ come back stronger ~','it happened ~ now let\'s figure out why 💜'];
-        showToast(msgs[Math.floor(Math.random()*msgs.length)]);
-    });
-}
-
-// TRACKER
-function updateTracker() {
-    if(!state)return;
-    loadAccount().then(()=>{
-        const streak=state.streak_days||0;
-        document.getElementById('tracker-total').textContent=state.relapses||0;
-        document.getElementById('tracker-streak').textContent=streak;
-        document.getElementById('tracker-best').textContent=state.best_streak||0;
-        const pct=Math.min(Math.round(streak/30*100),100);
-        document.getElementById('tracker-streak-pct').textContent=pct+'%';
-        document.getElementById('tracker-streak-bar').style.width=pct+'%';
-        const dates=state.relapse_dates||[];
-        const now=new Date(); const weekAgo=new Date(now-7*24*60*60*1000);
-        const weekly=dates.filter(d=>new Date(d)>=weekAgo).length;
-        document.getElementById('tracker-weekly').textContent=weekly;
-        const cal=document.getElementById('tracker-calendar');
-        let html='';
-        for(let i=27;i>=0;i--){
-            const d=new Date(); d.setDate(d.getDate()-i);
-            const ds=d.toISOString().split('T')[0];
-            const isToday=i===0;
-            const relapsed=dates.includes(ds);
-            const clean=!relapsed&&new Date(state.created_at)<=d;
-            html+=`<div class="cal-day ${relapsed?'relapsed':''} ${clean?'clean':''} ${isToday?'today':''}">${d.getDate()}</div>`;
-        }
-        cal.innerHTML=html;
-    });
-}
-
-// HISTORY
-function updateHistory() {
-    if(!state)return;
-    loadAccount().then(()=>{
-        const list=document.getElementById('tx-list');
-        const txs=state.transactions||[];
-        if(!txs.length){list.innerHTML='<li class="tx-item dim" style="font-style:italic;">no sessions yet ~</li>';}
-        else{list.innerHTML=txs.map(tx=>{
-            const d=new Date(tx.created_at).toLocaleDateString('en-NZ',{day:'numeric',month:'short'});
-            const noteStr=tx.note?` · ${tx.note}`:'';
-            return tx.type==='session'?`<li class="tx-item"><span class="tx-type tx-session">session</span><span class="dim" style="font-size:11px;">${d}${noteStr}</span><span class="tx-amount">$${tx.amount}</span></li>`:
-            `<li class="tx-item"><span class="tx-type tx-relapse">relapse</span><span class="dim" style="font-size:11px;">${d}</span><span style="color:#ff4444; font-size:12px;">streak reset</span></li>`;
-        }).join('');}
-    });
-}
-
-// JOURNAL (local only — private)
-function saveJournal() {
-    const text = document.getElementById('journal-entry').value.trim();
-    if(!text){showToast('write something first ~ 🤭');return;}
-    journalEntries.unshift({ date: new Date().toISOString(), text });
-    localStorage.setItem('t4a_journal', JSON.stringify(journalEntries));
-    document.getElementById('journal-entry').value='';
-    renderJournal();
-    showToast('entry saved 💜');
-}
-
-function renderJournal() {
-    const list = document.getElementById('journal-list');
-    if(!journalEntries.length){
-        list.innerHTML='<p class="dim" style="font-size:13px; font-style:italic;">no entries yet ~ start writing 💜</p>';
-        return;
-    }
-    list.innerHTML = journalEntries.slice(0,20).map(e => {
-        const d = new Date(e.date).toLocaleDateString('en-NZ',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-        return `<div class="journal-entry"><div class="journal-date">${d}</div><div class="journal-text">${e.text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div></div>`;
-    }).join('');
-}
-
-// Init
-loadAccount().then(s => { if(s) showScreen('screen-dashboard'); });
 </script>
 </body>
 </html>
